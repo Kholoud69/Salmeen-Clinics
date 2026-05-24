@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctors</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .doctorscards {
+            margin: 0;
+            min-height: 100vh;
+            background-color: #f5f7ff;
+            font-family: Arial, sans-serif;
+        }
+
+        .doctor-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            padding: 40px;
+            min-height: 100%;
+        }
+
+        .doctorcard {
+            width: 360px;
+            height: 400px;
+            font-size: 20px;
+            background: rgb(226, 248, 250);
+            border-radius: 18px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .doctorcard:hover {
+            transform: translateY(-5px);
+        }
+
+        .doctorcard h3 {
+            color: #041dac;
+            margin-bottom: 15px;
+        }
+
+        .doctorcard p {
+            margin: 20px 0;
+            color: #041dac;
+        }
+
+        .doctorcard a {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: rgb(49, 171, 204);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+
+        .doctorcard a:hover {
+            background-color: rgb(78, 102, 210);
+        }
+
+        /* =========================
+           MOBILE RESPONSIVE ONLY
+        ========================== */
+
+        @media (max-width: 768px) {
+
+            .doctor-container {
+                padding: 15px;
+                gap: 15px;
+            }
+
+            .doctorcard {
+                width: 100%;
+                max-width: 360px;
+                height: auto;
+                font-size: 16px;
+                padding: 18px;
+            }
+
+            .doctorcard a {
+                width: 100%;
+                text-align: center;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+        }
+
+        @media (max-width: 480px) {
+
+            .doctorcard {
+                max-width: 100%;
+                font-size: 15px;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body class="doctorscards">
+
+    <h1 style="text-align:center; margin-top:30px; color:rgb(6, 27, 110)">
+Book Your Specialist
+    </h1>
+
+    <div id="doctor-list" class="doctor-container"></div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const service = params.get("type");
+
+        const doctorsData = {
+
+            cardio: [
+                { name: "د. محمد اشرف حسن", days: "الأربعاء", time: "2م - 4م", price: "500 جنيه" }
+            ],
+
+            breastfeeding: [
+                { name: " د. ندين كامل ", days: " الأحد ", time: "7م - 9م", price: "700 جنيه" }
+            ],
+
+            digestive: [
+                { name: " د. محمد ناجح ", days: "السبت - الاثنين", time: "3م - 6م", price: "700 جنيه" }
+            ],
+
+            neuro: [
+                { name: " د. اوليفيا ايليا", days: "الاثنين", time: "6م - 8م", price: "700 جنيه" }
+            ],
+
+            endocrine: [
+                { name: " د. جهاد صابر", days: "--", time: "--", price: "--" }
+            ],
+
+            surgery: [
+                { name: "د. مصطفي عبدالرازق", days: "الأحد - الاثنين", time: "الاحد : 9م- 11م  /  الاثنين : 1ص - 3ص", price: "500 جنيه" }
+            ],
+
+            chest: [
+                { name: "د. سيلفيا ميشيل ", days: "الاحد", time: "5م - 7م", price: "700 جنيه" }
+            ],
+
+            behavior: [
+                { name: " د. منة الله زكريا", days: "الجمعة", time: "2م - 4م", price: "700 جنيه" }
+            ],
+
+            liver: [
+                { name: " د. سارة علي", days: "الثلاثاء", time: "2م - 4م", price: "700 جنيه" }
+            ],
+
+            neonatal: [
+                { name: " د. محمد خليفة ", days: "السبت - الاثنين", time: " السبت : 6 م - 8م     الاثنين: 8م - 10م", price: "700 جنيه" }
+            ],
+
+            pediatric: [
+                { name: " د.  محمد طارق ", days: " الخميس", time: "4م - 6م", price: "700 جنيه" }
+            ],
+
+            specialist: [
+                { name: " د. مهند احمد ", days: "الاربعاء", time: "5م - 7م", price: "500 جنيه" },
+                { name: "  د.محمد جمال", days: "الخميس", time: "2م - 4م", price: "500 جنيه" },
+                { name: "  د.بسنت خالد", days: "الثلاثاء - الاربعاء", time: "الثلاثاء: 7 م : 9م     الاربعاء: 8م : 10م", price: "500 جنيه" },
+                { name: "  د. بسنت محسن", days: "--", time: "on call", price: "500 جنيه" },
+            ],
+
+            consultant: [
+                { name: " د. محمود يسري ", days: "السبت - الثلاثاء - الخميس", time: "9م - 11م", price: "700 جنيه" }
+            ]
+        };
+
+        const container = document.getElementById("doctor-list");
+
+        if (doctorsData[service]) {
+
+            doctorsData[service].forEach(doc => {
+
+                container.innerHTML += `
+                    <div class="doctorcard">
+                        <h3>${doc.name}</h3>
+                        <p>الأيام: ${doc.days}</p>
+                        <p class="days">المواعيد: ${doc.time}</p>
+                        <p>السعر: ${doc.price}</p>
+
+
+                        <a href="booking.html?doctor=${encodeURIComponent(doc.name)}">
+                            Book Now
+                        </a>
+                    </div>
+                `;
+            });
+
+        } else {
+            container.innerHTML =
+                "<p style='text-align:center;'>لا يوجد أطباء حالياً</p>";
+        }
+    </script>
+
+</body>
+
+</html>
