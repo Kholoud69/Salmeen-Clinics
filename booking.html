@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- EmailJS -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+    <style>
+        /* ================= BASE (UNCHANGED LOOK) ================= */
+
+        .booking-page {
+            font-family: Arial, sans-serif;
+            background-image: url("imgs/child.avif");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+        }
+
+        form {
+            background: rgb(211, 239, 245);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        button {
+            width: 50%;
+            padding: 10px;
+            background: rgb(103, 141, 237);
+            color: white;
+            border: none;
+            border-radius: 5%;
+            cursor: pointer;
+            font-size: 20px;
+            margin-top: 15px;
+        }
+
+        button:hover {
+            background: rgb(78, 102, 210);
+        }
+
+        /* ================= MOBILE RESPONSIVE ================= */
+
+        @media (max-width: 768px) {
+
+            h2 {
+                font-size: 20px;
+                margin-top: 20px;
+            }
+
+            form {
+                max-width: 90% !important;
+                margin: 20px auto;
+                padding: 15px;
+            }
+
+            input {
+                font-size: 14px;
+            }
+
+            button {
+                font-size: 15px;
+            }
+
+        }
+
+        @media (max-width: 480px) {
+
+            form {
+                max-width: 95% !important;
+                padding: 12px;
+            }
+
+            h2 {
+                font-size: 18px;
+            }
+
+            input {
+                padding: 8px;
+            }
+
+            button {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body class="booking-page">
+
+    <h2 style="text-align:center; color: rgb(6, 28, 83);">حجز موعد</h2>
+
+    <form id="bookingForm" style="max-width:400px;margin:auto;">
+
+        <label>اسم الدكتور</label><br>
+        <input type="text" id="doctor" readonly><br><br>
+
+        <label>اسم المريض</label><br>
+        <input type="text" id="name" required><br><br>
+
+        <label>رقم الهاتف</label><br>
+        <input type="tel" id="phone" required><br><br>
+
+        <label>التاريخ</label><br>
+        <input type="date" id="date" required><br><br>
+
+        <label>الوقت</label><br>
+        <input type="time" id="time" required><br><br>
+
+        <label>نوع الاستشارة</label><br>
+        <select id="cons" required>
+            <option value="morning">أوفلاين</option>
+            <option value="afternoon">أونلاين</option>
+            <option value="evening">تطعيمات</option>
+        </select>
+
+        <button type="submit">تأكيد الحجز</button>
+
+    </form>
+
+    <p id="msg" style="text-align:center;color:green;"></p>
+
+    <script type="module">
+
+        // ================= Firebase =================
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "salmeen-clinics.firebaseapp.com",
+            projectId: "salmeen-clinics",
+            storageBucket: "salmeen-clinics.firebasestorage.app",
+            messagingSenderId: "1078634185066",
+            appId: "1:1078634185066:web:3a813122774e3f9b0e2513"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // ================= EmailJS =================
+        emailjs.init("hyF89mBGySQpyRX9z");
+
+        async function sendEmail(data) {
+
+            return emailjs.send("service_9i7qz6a", "template_feghc98", {
+                name: data.name,
+                doctor: data.doctor,
+                date: data.date,
+                time: data.time,
+                phone: data.phone
+            });
+
+        }
+
+        // ================= Fill doctor name =================
+        window.addEventListener("DOMContentLoaded", () => {
+            const params = new URLSearchParams(window.location.search);
+            const doctor = params.get("doctor");
+
+            if (doctor) {
+                document.getElementById("doctor").value = doctor;
+            }
+        });
+
+        // ================= Form submit =================
+        document.getElementById("bookingForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const data = {
+                doctor: document.getElementById("doctor").value,
+                name: document.getElementById("name").value,
+                phone: document.getElementById("phone").value,
+                date: document.getElementById("date").value,
+                time: document.getElementById("time").value
+            };
+
+            try {
+                // 1️⃣ Save to Firebase
+                await addDoc(collection(db, "bookings"), data);
+
+                // 2️⃣ Send Email to manager
+                await sendEmail(data);
+
+                document.getElementById("msg").innerText = "تم الحجز بنجاح ✅";
+                e.target.reset();
+
+            } catch (error) {
+                console.error(error);
+                alert("حدث خطأ ❌");
+            }
+        });
+
+    </script>
+
+</body>
+
+</html>
